@@ -1,4 +1,4 @@
-# ArixDEX - Auto Claim Bot
+# BUMP - Auto Claim Bot
 
 Referral link: [BUMP](https://t.me/MMproBump_bot?start=ref_5914982564)
 
