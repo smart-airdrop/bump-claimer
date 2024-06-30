@@ -10,4 +10,5 @@ Join our Telegram group to stay updated and get instructions on how to use this 
 
 ### Note
 
-Put your Telegram ID into the `data.txt` file
+Put your Telegram ID into the `data.txt` file.</br>
+Supports a configurable list of User-Agent strings for Android and iOS devices.
