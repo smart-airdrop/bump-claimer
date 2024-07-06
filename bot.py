@@ -137,13 +137,13 @@ class BUMP:
         print(f"{black}[{now}]{reset} {msg}{reset}")
 
     def main(self):
-        self.clear_terminal()
-        print(self.banner)
-        data = open(data_file, "r").read().splitlines()
-        num_acc = len(data)
-        self.log(self.line)
-        self.log(f"{green}Numer of account: {white}{num_acc}")
         while True:
+            self.clear_terminal()
+            print(self.banner)
+            data = open(data_file, "r").read().splitlines()
+            num_acc = len(data)
+            self.log(self.line)
+            self.log(f"{green}Numer of account: {white}{num_acc}")
             for no, data in enumerate(data):
                 self.log(self.line)
                 self.log(f"{green}Account number: {white}{no+1}/{num_acc}")
@@ -152,23 +152,20 @@ class BUMP:
                 try:
                     auth_user = self.auth_user(data=data).json()
                     auth_data = auth_user["token"]
-                    user_info = self.farming(auth_data=auth_data).json()
-
-                    user_id = user_info["telegram_id"]
-                    balance = user_info["balance"]
-                    farming_status = user_info["session"]["status"]
-                    self.log(f"{green}ID: {white}{user_id}")
-                    self.log(f"{green}Balance: {white}{balance:,}")
 
                     while True:
+                        user_info = self.farming(auth_data=auth_data).json()
+
+                        user_id = user_info["telegram_id"]
+                        balance = user_info["balance"]
+                        farming_status = user_info["session"]["status"]
+                        self.log(f"{green}ID: {white}{user_id}")
+                        self.log(f"{green}Balance: {white}{balance:,}")
                         if farming_status == "await":
                             self.log(f"{yellow}Farming not started yet")
                             start_farming = self.start_farming(auth_data=auth_data)
                             if start_farming.status_code == 200:
                                 self.log(f"{green}Start farming successful")
-                                user_info = self.farming(auth_data=auth_data).json()
-                                balance = user_info["balance"]
-                                self.log(f"{green}Current balance: {white}{balance:,}")
                                 break
                             else:
                                 self.log(f"{red}Start farming failed")
