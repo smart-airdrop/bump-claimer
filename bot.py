@@ -47,7 +47,7 @@ class BUMP:
             "Accept": "application/json, text/plain, */*",
             "Accept-Encoding": "gzip, deflate, br, zstd",
             "Accept-Language": "en-US,en;q=0.9",
-            "Authorization": f"{auth_data}",
+            "Authorization": f"Bearer {auth_data}",
             "Origin": "https://mmbump.pro",
             "Pragma": "no-cache",
             "Priority": "u=1, i",
@@ -62,7 +62,7 @@ class BUMP:
         }
 
     def auth_user(self, data):
-        url = "https://api.mmbump.pro/v1/login"
+        url = "https://api.mmbump.pro/v1/loginJwt"
 
         headers = {
             "Accept": "application/json, text/plain, */*",
@@ -151,7 +151,7 @@ class BUMP:
                 # Get user info
                 try:
                     auth_user = self.auth_user(data=data).json()
-                    auth_data = auth_user["token"]
+                    auth_data = auth_user["access_token"]
 
                     while True:
                         user_info = self.farming(auth_data=auth_data).json()
