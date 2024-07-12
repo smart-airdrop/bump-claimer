@@ -129,7 +129,7 @@ class BUMP:
 
         proxies = self.proxies(proxy_info=proxy_info)
 
-        response = requests.get(url=url, headers=headers, proxies=proxies)
+        response = requests.post(url=url, headers=headers, proxies=proxies)
 
         return response
 
@@ -171,6 +171,43 @@ class BUMP:
         proxies = self.proxies(proxy_info=proxy_info)
 
         response = requests.post(url=url, headers=headers, data={}, proxies=proxies)
+
+        return response
+
+    def ref_claim(self, auth_data, proxy_info):
+        url = "https://api.mmbump.pro/v1/friends/claim"
+
+        headers = self.headers(auth_data=auth_data)
+
+        proxies = self.proxies(proxy_info=proxy_info)
+
+        response = requests.post(url=url, headers=headers, proxies=proxies)
+
+        return response
+
+    def check_task(self, auth_data, proxy_info):
+        url = "https://api.mmbump.pro/v1/task-list"
+
+        headers = self.headers(auth_data=auth_data)
+
+        proxies = self.proxies(proxy_info=proxy_info)
+
+        response = requests.post(url=url, headers=headers, proxies=proxies)
+
+        return response
+
+    def complete_task(self, auth_data, task_id, proxy_info):
+        url = "https://api.mmbump.pro/v1/task-list/complete"
+
+        headers = self.headers(auth_data=auth_data)
+
+        payload = {"id": task_id}
+
+        proxies = self.proxies(proxy_info=proxy_info)
+
+        response = requests.post(
+            url=url, headers=headers, data=payload, proxies=proxies
+        )
 
         return response
 
@@ -257,6 +294,49 @@ class BUMP:
                         else:
                             self.log(f"{yellow}In farming status, claim later")
                             break
+
+                    try:
+                        tasks = self.check_task(
+                            auth_data=auth_data, proxy_info=proxy_info
+                        ).json()
+                        for task in tasks:
+                            task_id = task["id"]
+                            task_name = task["name"]
+                            task_status = task["status"]
+                            if task_status == "possible":
+                                complete_task = self.complete_task(
+                                    auth_data=auth_data,
+                                    task_id=task_id,
+                                    proxy_info=proxy_info,
+                                )
+                                status = complete_task.json()["task"]["status"]
+                                if (
+                                    complete_task.status_code == 200
+                                    and status != "possible"
+                                ):
+                                    self.log(f"{white}{task_name}: {green}Completed")
+                                else:
+                                    self.log(f"{white}{task_name}: {red}Incompleted")
+                            else:
+                                pass
+                    except Exception as e:
+                        self.log(f"{red}Check task error!!!")
+
+                    try:
+                        ref_claim = self.ref_claim(
+                            auth_data=auth_data, proxy_info=proxy_info
+                        ).json()
+                        balance = ref_claim["balance"]
+                        claimed_amount = int(ref_claim["sum"])
+                        if claimed_amount > 0:
+                            self.log(
+                                f"{green}Claimed from ref: {white}{claimed_amount:,}"
+                            )
+                            self.log(f"{green}Current balance: {white}{balance:,}")
+                        else:
+                            self.log(f"{yellow}No point from ref")
+                    except Exception as e:
+                        self.log(f"{red}Claim from ref error!!!")
                 except Exception as e:
                     self.log(f"{red}Get user info error!!!")
 
