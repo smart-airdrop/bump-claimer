@@ -97,7 +97,7 @@ class BUMP:
 
         headers = self.headers(auth_data=auth_data)
 
-        response = requests.get(url=url, headers=headers)
+        response = requests.post(url=url, headers=headers)
 
         return response
 
@@ -129,6 +129,35 @@ class BUMP:
         headers = self.headers(auth_data=auth_data)
 
         response = requests.post(url=url, headers=headers, data={})
+
+        return response
+
+    def ref_claim(self, auth_data):
+        url = "https://api.mmbump.pro/v1/friends/claim"
+
+        headers = self.headers(auth_data=auth_data)
+
+        response = requests.post(url=url, headers=headers)
+
+        return response
+
+    def check_task(self, auth_data):
+        url = "https://api.mmbump.pro/v1/task-list"
+
+        headers = self.headers(auth_data=auth_data)
+
+        response = requests.post(url=url, headers=headers)
+
+        return response
+
+    def complete_task(self, auth_data, task_id):
+        url = "https://api.mmbump.pro/v1/task-list/complete"
+
+        headers = self.headers(auth_data=auth_data)
+
+        payload = {"id": task_id}
+
+        response = requests.post(url=url, headers=headers, data=payload)
 
         return response
 
@@ -186,6 +215,43 @@ class BUMP:
                         else:
                             self.log(f"{yellow}In farming status, claim later")
                             break
+
+                    try:
+                        tasks = self.check_task(auth_data=auth_data).json()
+                        for task in tasks:
+                            task_id = task["id"]
+                            task_name = task["name"]
+                            task_status = task["status"]
+                            if task_status == "possible":
+                                complete_task = self.complete_task(
+                                    auth_data=auth_data, task_id=task_id
+                                )
+                                status = complete_task.json()["task"]["status"]
+                                if (
+                                    complete_task.status_code == 200
+                                    and status != "possible"
+                                ):
+                                    self.log(f"{white}{task_name}: {green}Completed")
+                                else:
+                                    self.log(f"{white}{task_name}: {red}Incompleted")
+                            else:
+                                pass
+                    except Exception as e:
+                        self.log(f"{red}Check task error!!!")
+
+                    try:
+                        ref_claim = self.ref_claim(auth_data=auth_data).json()
+                        balance = ref_claim["balance"]
+                        claimed_amount = int(ref_claim["sum"])
+                        if claimed_amount > 0:
+                            self.log(
+                                f"{green}Claimed from ref: {white}{claimed_amount:,}"
+                            )
+                            self.log(f"{green}Current balance: {white}{balance:,}")
+                        else:
+                            self.log(f"{yellow}No point from ref")
+                    except Exception as e:
+                        self.log(f"{red}Claim from ref error!!!")
                 except Exception as e:
                     self.log(f"{red}Get user info error!!!")
 
